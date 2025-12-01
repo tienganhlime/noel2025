@@ -20,6 +20,12 @@
     <div class="upload-section card">
       <h2>📤 Upload danh sách học sinh</h2>
       <p>File Excel cần có các cột: Họ tên, Lớp, Đi cùng bố mẹ, Số coupon, Đã đóng phí, Số tiền phí</p>
+      
+      <div class="upload-actions">
+        <button onclick="downloadExcelTemplate()" class="btn-success">📥 Tải file Excel mẫu</button>
+        <button onclick="showAddStudentForm()" class="btn-secondary">➕ Thêm học sinh lẻ</button>
+      </div>
+      
       <input type="file" id="excelFile" accept=".xlsx,.xls" class="file-input">
       <button onclick="handleUpload()" class="btn-primary">Upload & Tạo QR Code</button>
       <div id="uploadStatus"></div>
@@ -94,6 +100,67 @@
     <div class="modal-content qr-modal-content">
       <span class="close" onclick="closeQRModal()">&times;</span>
       <div id="qrContent"></div>
+    </div>
+  </div>
+
+  <!-- Add Student Modal -->
+  <div id="addStudentModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeAddStudentModal()">&times;</span>
+      <h2>➕ Thêm học sinh mới</h2>
+      
+      <form id="addStudentForm" onsubmit="handleAddStudent(event)">
+        <div class="form-group">
+          <label>Họ tên *</label>
+          <input type="text" id="newStudentName" required class="form-input">
+        </div>
+        
+        <div class="form-group">
+          <label>Lớp *</label>
+          <input type="text" id="newStudentClass" required class="form-input" placeholder="VD: 1A, 2B...">
+        </div>
+        
+        <div class="form-group">
+          <label>Đi cùng bố mẹ</label>
+          <select id="newStudentAccompanied" class="form-input">
+            <option value="Không">Không (đi một mình)</option>
+            <option value="Có (1 người)">Có (1 người)</option>
+            <option value="Có (2 người)" selected>Có (2 người)</option>
+            <option value="Có (3 người)">Có (3 người)</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>Số coupon</label>
+          <input type="number" id="newStudentCoupons" value="0" min="0" class="form-input">
+        </div>
+        
+        <div class="form-group">
+          <label>Số tiền phí (VNĐ)</label>
+          <input type="number" id="newStudentFee" value="200000" min="0" step="1000" class="form-input">
+        </div>
+        
+        <div class="form-group">
+          <label>Trạng thái phí</label>
+          <div class="radio-group">
+            <label>
+              <input type="radio" name="newFeeStatus" value="unpaid" checked>
+              Chưa đóng
+            </label>
+            <label>
+              <input type="radio" name="newFeeStatus" value="paid">
+              Đã đóng
+            </label>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Ghi chú (tùy chọn)</label>
+          <textarea id="newStudentNote" class="form-input" rows="2"></textarea>
+        </div>
+        
+        <button type="submit" class="btn-primary">💾 Lưu học sinh</button>
+      </form>
     </div>
   </div>
 
