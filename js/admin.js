@@ -405,16 +405,6 @@ document.addEventListener('DOMContentLoaded', () => {
   
   document.getElementById('searchInput').addEventListener('input', renderStudents);
   
-  // Add event listeners for new buttons
-  const downloadBtn = document.getElementById('downloadTemplateBtn');
-  if (downloadBtn) {
-    downloadBtn.addEventListener('click', downloadExcelTemplate);
-  }
-  
-  const addStudentBtn = document.getElementById('addStudentBtn');
-  if (addStudentBtn) {
-    addStudentBtn.addEventListener('click', showAddStudentForm);
-  }
 });
 
 // Close modal on outside click
