@@ -409,10 +409,160 @@ document.addEventListener('DOMContentLoaded', () => {
 window.onclick = function(event) {
   const modal = document.getElementById('studentModal');
   const qrModal = document.getElementById('qrModal');
+  const addModal = document.getElementById('addStudentModal');
   if (event.target === modal) {
     closeModal();
   }
   if (event.target === qrModal) {
     closeQRModal();
+  }
+  if (event.target === addModal) {
+    closeAddStudentModal();
+  }
+}
+
+// Download Excel template
+function downloadExcelTemplate() {
+  const templateData = [
+    {
+      'Họ tên': 'Nguyễn Văn A',
+      'Lớp': '1A',
+      'Đi cùng bố mẹ': 'Có (2 người)',
+      'Số coupon': 3,
+      'Đã đóng phí': 'Rồi',
+      'Số tiền phí': 200000
+    },
+    {
+      'Họ tên': 'Trần Thị B',
+      'Lớp': '1B',
+      'Đi cùng bố mẹ': 'Không',
+      'Số coupon': 2,
+      'Đã đóng phí': 'Chưa',
+      'Số tiền phí': 200000
+    },
+    {
+      'Họ tên': 'Lê Văn C',
+      'Lớp': '2A',
+      'Đi cùng bố mẹ': 'Có (1 người)',
+      'Số coupon': 5,
+      'Đã đóng phí': 'Rồi',
+      'Số tiền phí': 200000
+    }
+  ];
+  
+  const ws = XLSX.utils.json_to_sheet(templateData);
+  
+  // Set column widths
+  ws['!cols'] = [
+    { wch: 20 }, // Họ tên
+    { wch: 10 }, // Lớp
+    { wch: 20 }, // Đi cùng bố mẹ
+    { wch: 12 }, // Số coupon
+    { wch: 15 }, // Đã đóng phí
+    { wch: 15 }  // Số tiền phí
+  ];
+  
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Danh sách mẫu');
+  
+  // Add instructions sheet
+  const instructionsData = [
+    { 'Hướng dẫn': 'Cột "Họ tên": Nhập họ tên đầy đủ của học sinh' },
+    { 'Hướng dẫn': 'Cột "Lớp": Nhập lớp (VD: 1A, 2B, 3C...)' },
+    { 'Hướng dẫn': 'Cột "Đi cùng bố mẹ": Nhập "Không" nếu đi một mình, hoặc "Có (2 người)" nếu đi cùng' },
+    { 'Hướng dẫn': 'Cột "Số coupon": Nhập số lượng coupon (số nguyên)' },
+    { 'Hướng dẫn': 'Cột "Đã đóng phí": Nhập "Rồi" hoặc "Đã" nếu đã đóng, "Chưa" nếu chưa đóng' },
+    { 'Hướng dẫn': 'Cột "Số tiền phí": Nhập số tiền (VD: 200000) - không có dấu phẩy' },
+    { 'Hướng dẫn': '' },
+    { 'Hướng dẫn': 'Sau khi điền xong, lưu file và upload lên hệ thống' }
+  ];
+  const wsInstructions = XLSX.utils.json_to_sheet(instructionsData);
+  wsInstructions['!cols'] = [{ wch: 80 }];
+  XLSX.utils.book_append_sheet(wb, wsInstructions, 'Hướng dẫn');
+  
+  XLSX.writeFile(wb, 'Mau_Danh_Sach_Hoc_Sinh.xlsx');
+}
+
+// Show add student form
+function showAddStudentForm() {
+  const modal = document.getElementById('addStudentModal');
+  modal.style.display = 'block';
+  
+  // Reset form
+  document.getElementById('addStudentForm').reset();
+  document.getElementById('newStudentFee').value = 200000;
+  document.getElementById('newStudentCoupons').value = 0;
+}
+
+function closeAddStudentModal() {
+  document.getElementById('addStudentModal').style.display = 'none';
+}
+
+// Handle add student
+async function handleAddStudent(event) {
+  event.preventDefault();
+  
+  const name = document.getElementById('newStudentName').value.trim();
+  const studentClass = document.getElementById('newStudentClass').value.trim();
+  const accompanied = document.getElementById('newStudentAccompanied').value;
+  const coupons = parseInt(document.getElementById('newStudentCoupons').value);
+  const feeAmount = parseInt(document.getElementById('newStudentFee').value);
+  const feeStatus = document.querySelector('input[name="newFeeStatus"]:checked').value;
+  const note = document.getElementById('newStudentNote').value.trim();
+  
+  if (!name || !studentClass) {
+    alert('⚠️ Vui lòng nhập đầy đủ họ tên và lớp!');
+    return;
+  }
+  
+  const qrCode = generateQRCode();
+  
+  const studentData = {
+    name: name,
+    class: studentClass,
+    accompaniedBy: accompanied,
+    coupons: coupons,
+    feeAmount: feeAmount,
+    feeStatus: feeStatus,
+    feePaidAt: feeStatus === 'paid' ? firebase.firestore.Timestamp.now() : null,
+    feePaidBy: feeStatus === 'paid' ? 'admin' : null,
+    feeNote: note || (feeStatus === 'paid' ? 'Đã đóng trước sự kiện' : ''),
+    feeHistory: feeStatus === 'paid' ? [{
+      timestamp: firebase.firestore.Timestamp.now(),
+      changedBy: getCurrentUserEmail(),
+      action: 'marked_paid',
+      oldStatus: 'unpaid',
+      newStatus: 'paid',
+      amount: feeAmount,
+      note: note || 'Thêm mới - Đã đóng trước'
+    }] : [],
+    qrCode: qrCode,
+    status: 'not-arrived',
+    checkIn: null,
+    checkOut: null,
+    createdAt: firebase.firestore.Timestamp.now()
+  };
+  
+  try {
+    // Disable submit button
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Đang lưu...';
+    
+    await db.collection('students').add(studentData);
+    
+    alert('✅ Đã thêm học sinh: ' + name);
+    closeAddStudentModal();
+    loadStudents();
+    
+  } catch (error) {
+    console.error('Add student error:', error);
+    alert('❌ Lỗi thêm học sinh: ' + error.message);
+  } finally {
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = '💾 Lưu học sinh';
+    }
   }
 }
