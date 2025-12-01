@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đăng nhập Admin - Event Check-in</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-box">
+      <h1>🎓 Event Check-in</h1>
+      <h2>Đăng nhập Admin</h2>
+      
+      <form id="loginForm">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="email" required placeholder="admin@example.com">
+        </div>
+        
+        <div class="form-group">
+          <label>Mật khẩu</label>
+          <input type="password" id="password" required placeholder="••••••••">
+        </div>
+        
+        <div id="errorMessage" class="error-message"></div>
+        
+        <button type="submit" class="btn-primary">Đăng nhập</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <!-- Không cần Storage -->
+  <script src="../js/firebase-config.js"></script>
+  
+  <script>
+    const loginForm = document.getElementById('loginForm');
+    const errorMessage = document.getElementById('errorMessage');
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorMessage.textContent = '';
+      
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+        window.location.href = 'index.html';
+      } catch (error) {
+        console.error('Login error:', error);
+        if (error.code === 'auth/user-not-found') {
+          errorMessage.textContent = 'Email không tồn tại';
+        } else if (error.code === 'auth/wrong-password') {
+          errorMessage.textContent = 'Mật khẩu không đúng';
+        } else if (error.code === 'auth/invalid-email') {
+          errorMessage.textContent = 'Email không hợp lệ';
+        } else {
+          errorMessage.textContent = 'Đăng nhập thất bại: ' + error.message;
+        }
+      }
+    });
+
+    // Redirect if already logged in
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        window.location.href = 'index.html';
+      }
+    });
+  </script>
+</body>
+</html>
