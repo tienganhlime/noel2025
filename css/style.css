@@ -216,6 +216,18 @@ body {
   margin-bottom: 15px;
 }
 
+.upload-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.upload-actions button {
+  flex: 1;
+  min-width: 200px;
+}
+
 .file-input {
   display: block;
   margin-bottom: 15px;
