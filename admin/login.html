@@ -65,10 +65,25 @@
       }
     });
 
-    // Redirect if already logged in
+    // Check if already logged in - but don't auto redirect, show logout option instead
     auth.onAuthStateChanged((user) => {
       if (user) {
-        window.location.href = 'index.html';
+        // User already logged in, show option
+        const loginBox = document.querySelector('.login-box');
+        loginBox.innerHTML = `
+          <h1>🎓 Event Check-in</h1>
+          <h2>Đã đăng nhập</h2>
+          <p style="text-align: center; margin: 20px 0;">
+            Bạn đang đăng nhập với:<br>
+            <strong>${user.email}</strong>
+          </p>
+          <button onclick="window.location.href='index.html'" class="btn-primary" style="margin-bottom: 10px;">
+            Vào Dashboard
+          </button>
+          <button onclick="auth.signOut().then(() => location.reload())" class="btn-secondary" style="width: 100%;">
+            Đăng xuất
+          </button>
+        `;
       }
     });
   </script>
