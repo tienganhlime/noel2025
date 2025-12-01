@@ -6,6 +6,8 @@ let videoStream = null;
 let captureStream = null;
 let scanningActive = false;
 let searchFilter = 'checked-in';
+let scanCount = 0;
+let currentFacingMode = 'environment'; // ← THÊM DÒNG NÀY
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -295,8 +297,11 @@ async function openCamera() {
   const video = document.getElementById('captureVideo');
   
   try {
+    // Dùng camera SAU (environment) để chụp học sinh
     captureStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'user' }
+      video: { 
+        facingMode: 'environment' // Camera sau
+      }
     });
     video.srcObject = captureStream;
     
@@ -304,7 +309,25 @@ async function openCamera() {
     captureDiv.style.display = 'block';
   } catch (error) {
     console.error('Camera error:', error);
-    alert('Không thể mở camera: ' + error.message);
+    
+    // Nếu không có camera sau, thử camera trước
+    if (error.name === 'OverconstrainedError' || error.name === 'ConstraintNotSatisfiedError') {
+      try {
+        captureStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user' } // Camera trước
+        });
+        video.srcObject = captureStream;
+        
+        document.getElementById('studentDetail').style.display = 'none';
+        captureDiv.style.display = 'block';
+        
+        alert('⚠️ Không tìm thấy camera sau. Đang dùng camera trước.');
+      } catch (err2) {
+        alert('Không thể mở camera: ' + err2.message);
+      }
+    } else {
+      alert('Không thể mở camera: ' + error.message);
+    }
   }
 }
 
@@ -317,7 +340,35 @@ function closeCameraCapture() {
   document.getElementById('cameraCapture').style.display = 'none';
   document.getElementById('studentDetail').style.display = 'block';
 }
-
+// Switch camera (front/back)
+async function switchCamera() {
+  currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+  
+  if (captureStream) {
+    captureStream.getTracks().forEach(track => track.stop());
+  }
+  
+  const video = document.getElementById('captureVideo');
+  try {
+    captureStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: currentFacingMode }
+    });
+    video.srcObject = captureStream;
+  } catch (error) {
+    console.error('Switch camera error:', error);
+    alert('Không thể chuyển camera: ' + error.message);
+    
+    currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+    try {
+      captureStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: currentFacingMode }
+      });
+      video.srcObject = captureStream;
+    } catch (err2) {
+      alert('Lỗi camera: ' + err2.message);
+    }
+  }
+}
 // Take picture
 function takePicture() {
   const video = document.getElementById('captureVideo');
