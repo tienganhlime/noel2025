@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Check-in System</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .welcome-box {
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      text-align: center;
+      max-width: 500px;
+    }
+    h1 {
+      color: #667eea;
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+    p {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 1.1em;
+    }
+    .buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .btn {
+      padding: 15px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: block;
+      transition: transform 0.2s;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+    .btn-success {
+      background: #28a745;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="welcome-box">
+    <h1>🎓 Event Check-in</h1>
+    <p>Hệ thống quản lý check-in/out sự kiện</p>
+    
+    <div class="buttons">
+      <a href="admin/login.html" class="btn btn-primary">
+        👨‍💼 Đăng nhập Admin
+      </a>
+      <a href="scan/index.html" class="btn btn-success">
+        📱 Check-in/out (Staff)
+      </a>
+    </div>
+  </div>
+</body>
+</html>
