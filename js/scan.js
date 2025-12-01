@@ -473,7 +473,7 @@ async function confirmCheckIn() {
       <div class="success-message">
         <h2>✅ Check-in thành công!</h2>
         <p>${currentStudent.name}</p>
-        <button onclick="backToScan()" class="btn-primary">Tiếp tục quét</button>
+        <button onclick="window.location.reload()" class="btn-primary">Tiếp tục quét</button>
       </div>
     `;
     
@@ -512,7 +512,7 @@ async function confirmCheckOut() {
       <div class="success-message">
         <h2>✅ Check-out thành công!</h2>
         <p>${currentStudent.name}</p>
-        <button onclick="backToScan()" class="btn-primary">Tiếp tục quét</button>
+        <button onclick="window.location.reload()" class="btn-primary">Tiếp tục quét</button>
       </div>
     `;
     
