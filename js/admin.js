@@ -253,8 +253,14 @@ function showStudentDetail(studentId) {
   const content = document.getElementById('modalContent');
   
   const checkInInfo = student.checkIn ? `
-  <div class="detail-section">
-    <h3>✅ Check-in</h3>
+<div class="detail-section">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+    <h3>📋 ${student.name}</h3>
+    <div style="display: flex; gap: 10px;">
+      <button onclick="showEditStudentForm('${student.id}')" class="btn-secondary">✏️ Sửa</button>
+      <button onclick="deleteStudent('${student.id}')" class="btn-secondary" style="background: #dc3545;">🗑️ Xóa</button>
+    </div>
+  </div>
     <p>Thời gian: ${formatDateTime(student.checkIn.time)}</p>
     ${student.checkIn.photoUrl ? `<img src="${student.checkIn.photoUrl}" alt="Ảnh check-in" class="check-photo">` : ''}
     <button onclick="deleteCheckIn('${student.id}')" class="btn-secondary" style="margin-top: 10px;">🗑️ Xóa check-in</button>
@@ -489,8 +495,14 @@ function downloadExcelTemplate() {
 
 // Show add student form
 function showAddStudentForm() {
+  editingStudentId = null; // Reset editing mode
+  
   const modal = document.getElementById('addStudentModal');
   modal.style.display = 'block';
+  
+  // Reset title and button text
+  document.querySelector('#addStudentModal h2').textContent = '➕ Thêm học sinh mới';
+  document.querySelector('#addStudentForm button[type="submit"]').textContent = '💾 Lưu học sinh';
   
   // Reset form
   document.getElementById('addStudentForm').reset();
@@ -502,23 +514,6 @@ function closeAddStudentModal() {
   document.getElementById('addStudentModal').style.display = 'none';
 }
 
-// Handle add student
-async function handleAddStudent(event) {
-  event.preventDefault();
-  
-  const name = document.getElementById('newStudentName').value.trim();
-  const studentClass = document.getElementById('newStudentClass').value.trim();
-  const accompanied = document.getElementById('newStudentAccompanied').value;
-  const coupons = parseInt(document.getElementById('newStudentCoupons').value);
-  const feeAmount = parseInt(document.getElementById('newStudentFee').value);
-  const feeStatus = document.querySelector('input[name="newFeeStatus"]:checked').value;
-  const note = document.getElementById('newStudentNote').value.trim();
-  
-  if (!name || !studentClass) {
-    alert('⚠️ Vui lòng nhập đầy đủ họ tên và lớp!');
-    return;
-  }
-  
   const qrCode = generateQRCode();
   
   const studentData = {
@@ -608,6 +603,177 @@ async function deleteCheckOut(studentId) {
     loadStudents();
   } catch (error) {
     console.error('Delete check-out error:', error);
+    alert('❌ Lỗi xóa: ' + error.message);
+  }
+}
+// Show edit student form
+function showEditStudentForm(studentId) {
+  const student = allStudents.find(s => s.id === studentId);
+  if (!student) return;
+  
+  editingStudentId = studentId;
+  
+  // Fill form with current data
+  document.getElementById('newStudentName').value = student.name;
+  document.getElementById('newStudentClass').value = student.class;
+  document.getElementById('newStudentAccompanied').value = student.accompaniedBy;
+  document.getElementById('newStudentCoupons').value = student.coupons;
+  document.getElementById('newStudentFee').value = student.feeAmount;
+  
+  if (student.feeStatus === 'paid') {
+    document.querySelector('input[name="newFeeStatus"][value="paid"]').checked = true;
+  } else {
+    document.querySelector('input[name="newFeeStatus"][value="unpaid"]').checked = true;
+  }
+  
+  document.getElementById('newStudentNote').value = student.feeNote || '';
+  
+  // Change modal title and button
+  document.querySelector('#addStudentModal h2').textContent = '✏️ Sửa thông tin học sinh';
+  document.querySelector('#addStudentForm button[type="submit"]').textContent = '💾 Cập nhật học sinh';
+  
+  // Close detail modal and show edit modal
+  closeModal();
+  document.getElementById('addStudentModal').style.display = 'block';
+}
+
+// Update handleAddStudent to support editing
+async function handleAddStudentOrUpdate(event) {
+  event.preventDefault();
+  
+  const name = document.getElementById('newStudentName').value.trim();
+  const studentClass = document.getElementById('newStudentClass').value.trim();
+  const accompanied = document.getElementById('newStudentAccompanied').value;
+  const coupons = parseInt(document.getElementById('newStudentCoupons').value);
+  const feeAmount = parseInt(document.getElementById('newStudentFee').value);
+  const feeStatus = document.querySelector('input[name="newFeeStatus"]:checked').value;
+  const note = document.getElementById('newStudentNote').value.trim();
+  
+  if (!name || !studentClass) {
+    alert('⚠️ Vui lòng nhập đầy đủ họ tên và lớp!');
+    return;
+  }
+  
+  const submitBtn = event.target.querySelector('button[type="submit"]');
+  submitBtn.disabled = true;
+  
+  try {
+    // EDITING MODE
+    if (editingStudentId) {
+      const student = allStudents.find(s => s.id === editingStudentId);
+      
+      const updateData = {
+        name: name,
+        class: studentClass,
+        accompaniedBy: accompanied,
+        coupons: coupons,
+        feeAmount: feeAmount,
+        feeStatus: feeStatus,
+        feeNote: note
+      };
+      
+      // Add to history if fee status changed
+      if (student.feeStatus !== feeStatus) {
+        const historyEntry = {
+          timestamp: firebase.firestore.Timestamp.now(),
+          changedBy: getCurrentUserEmail(),
+          action: 'updated',
+          oldStatus: student.feeStatus,
+          newStatus: feeStatus,
+          amount: feeAmount,
+          note: note || 'Admin cập nhật'
+        };
+        
+        updateData.feeHistory = firebase.firestore.FieldValue.arrayUnion(historyEntry);
+        
+        if (feeStatus === 'paid') {
+          updateData.feePaidAt = firebase.firestore.Timestamp.now();
+          updateData.feePaidBy = 'admin';
+        }
+      }
+      
+      await db.collection('students').doc(editingStudentId).update(updateData);
+      alert('✅ Đã cập nhật thông tin học sinh: ' + name);
+      
+      editingStudentId = null;
+      closeAddStudentModal();
+      loadStudents();
+      
+    } 
+    // ADDING MODE
+    else {
+      const qrCode = generateQRCode();
+      
+      const studentData = {
+        name: name,
+        class: studentClass,
+        accompaniedBy: accompanied,
+        coupons: coupons,
+        feeAmount: feeAmount,
+        feeStatus: feeStatus,
+        feePaidAt: feeStatus === 'paid' ? firebase.firestore.Timestamp.now() : null,
+        feePaidBy: feeStatus === 'paid' ? 'admin' : null,
+        feeNote: note || (feeStatus === 'paid' ? 'Đã đóng trước sự kiện' : ''),
+        feeHistory: feeStatus === 'paid' ? [{
+          timestamp: firebase.firestore.Timestamp.now(),
+          changedBy: getCurrentUserEmail(),
+          action: 'marked_paid',
+          oldStatus: 'unpaid',
+          newStatus: 'paid',
+          amount: feeAmount,
+          note: note || 'Thêm mới - Đã đóng trước'
+        }] : [],
+        qrCode: qrCode,
+        status: 'not-arrived',
+        checkIn: null,
+        checkOut: null,
+        createdAt: firebase.firestore.Timestamp.now()
+      };
+      
+      await db.collection('students').add(studentData);
+      alert('✅ Đã thêm học sinh: ' + name);
+      closeAddStudentModal();
+      loadStudents();
+    }
+    
+  } catch (error) {
+    console.error('Save error:', error);
+    alert('❌ Lỗi: ' + error.message);
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = editingStudentId ? '💾 Cập nhật học sinh' : '💾 Lưu học sinh';
+  }
+}
+
+// Delete student
+async function deleteStudent(studentId) {
+  const student = allStudents.find(s => s.id === studentId);
+  if (!student) return;
+  
+  const confirmMsg = `⚠️ BẠN CÓ CHẮC CHẮN MUỐN XÓA?
+
+Học sinh: ${student.name}
+Lớp: ${student.class}
+
+⛔ Hành động này KHÔNG THỂ hoàn tác!
+Tất cả thông tin check-in/out và ảnh sẽ bị xóa vĩnh viễn.
+
+Nhập "XOA" (viết hoa) để xác nhận:`;
+  
+  const confirmation = prompt(confirmMsg);
+  
+  if (confirmation !== 'XOA') {
+    alert('❌ Đã hủy xóa.');
+    return;
+  }
+  
+  try {
+    await db.collection('students').doc(studentId).delete();
+    alert('✅ Đã xóa học sinh: ' + student.name);
+    closeModal();
+    loadStudents();
+  } catch (error) {
+    console.error('Delete error:', error);
     alert('❌ Lỗi xóa: ' + error.message);
   }
 }
