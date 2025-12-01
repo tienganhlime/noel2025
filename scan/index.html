@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Check-in/out - Event</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="scan-header">
+    <h1>🎓 Event Check-in/out</h1>
+  </div>
+
+  <div class="scan-container">
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('scan')">📷 Quét QR</button>
+      <button class="tab-btn" onclick="switchTab('search')">🔍 Tìm kiếm</button>
+    </div>
+
+    <!-- Scan Tab -->
+    <div id="scanTab" class="tab-content active">
+      <div class="camera-container">
+        <video id="video" autoplay playsinline></video>
+        <div class="camera-overlay">
+          <div class="scan-frame"></div>
+          <p class="scan-hint">Đưa mã QR vào khung hình</p>
+        </div>
+      </div>
+      <div id="scanStatus" class="scan-status"></div>
+    </div>
+
+    <!-- Search Tab -->
+    <div id="searchTab" class="tab-content">
+      <div class="search-section">
+        <input type="text" id="searchStudentInput" placeholder="🔍 Nhập tên học sinh..." class="search-input">
+        
+        <div class="filter-chips">
+          <button class="chip active" data-filter="checked-in">Đã check-in</button>
+          <button class="chip" data-filter="all">Tất cả</button>
+        </div>
+        
+        <div id="searchResults" class="search-results"></div>
+      </div>
+    </div>
+
+    <!-- Student Detail (after scan/search) -->
+    <div id="studentDetail" class="student-detail" style="display: none;">
+      <div id="studentContent"></div>
+    </div>
+
+    <!-- Camera Capture -->
+    <div id="cameraCapture" class="camera-capture" style="display: none;">
+      <video id="captureVideo" autoplay playsinline></video>
+      <canvas id="captureCanvas" style="display: none;"></canvas>
+      <div class="capture-controls">
+        <button onclick="takePicture()" class="btn-primary btn-large">📷 Chụp ảnh</button>
+        <button onclick="closeCameraCapture()" class="btn-secondary">Hủy</button>
+      </div>
+    </div>
+
+    <!-- Photo Preview -->
+    <div id="photoPreview" class="photo-preview" style="display: none;">
+      <img id="previewImage" alt="Preview">
+      <div class="preview-controls">
+        <button onclick="confirmCheckIn()" class="btn-success btn-large">✓ Xác nhận CHECK-IN</button>
+        <button onclick="retakePhoto()" class="btn-secondary">↻ Chụp lại</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <!-- Không cần Storage -->
+  <script src="../js/firebase-config.js"></script>
+  
+  <!-- QR Scanner Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.min.js"></script>
+  
+  <script src="../js/scan.js"></script>
+</body>
+</html>
