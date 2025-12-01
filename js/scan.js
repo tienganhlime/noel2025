@@ -36,15 +36,39 @@ async function startQRScanner() {
   const statusDiv = document.getElementById('scanStatus');
   
   try {
-    videoStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment' }
-    });
+    // Request camera với constraints tốt hơn
+    const constraints = {
+      video: { 
+        facingMode: 'environment',
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      }
+    };
+    
+    videoStream = await navigator.mediaDevices.getUserMedia(constraints);
     video.srcObject = videoStream;
-    scanningActive = true;
-    scanQRCode();
+    
+    // Đợi video sẵn sàng
+    video.onloadedmetadata = () => {
+      video.play();
+      scanningActive = true;
+      statusDiv.innerHTML = '<div class="success">Camera đã sẵn sàng. Đưa QR code vào khung hình...</div>';
+      scanQRCode();
+    };
+    
   } catch (error) {
     console.error('Camera error:', error);
-    statusDiv.innerHTML = '<div class="error">Không thể truy cập camera</div>';
+    let errorMsg = 'Không thể truy cập camera. ';
+    
+    if (error.name === 'NotAllowedError') {
+      errorMsg += 'Vui lòng cho phép truy cập camera trong cài đặt trình duyệt.';
+    } else if (error.name === 'NotFoundError') {
+      errorMsg += 'Không tìm thấy camera trên thiết bị.';
+    } else {
+      errorMsg += error.message;
+    }
+    
+    statusDiv.innerHTML = `<div class="error">${errorMsg}</div>`;
   }
 }
 
@@ -65,15 +89,32 @@ function scanQRCode() {
   const canvas = document.createElement('canvas');
   const context = canvas.getContext('2d');
   
+  // Đợi video ready
+  if (video.readyState !== video.HAVE_ENOUGH_DATA) {
+    requestAnimationFrame(scanQRCode);
+    return;
+  }
+  
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
   
   if (canvas.width > 0 && canvas.height > 0) {
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
     const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-    const code = jsQR(imageData.data, imageData.width, imageData.height);
+    
+    // Check if jsQR exists
+    if (typeof jsQR === 'undefined') {
+      console.error('jsQR library not loaded!');
+      document.getElementById('scanStatus').innerHTML = '<div class="error">Lỗi: Thư viện QR scanner chưa load</div>';
+      return;
+    }
+    
+    const code = jsQR(imageData.data, imageData.width, imageData.height, {
+      inversionAttempts: "dontInvert",
+    });
     
     if (code) {
+      console.log('QR Code detected:', code.data);
       scanningActive = false;
       handleQRCodeScanned(code.data);
       return;
@@ -500,4 +541,12 @@ async function selectStudent(studentId) {
     console.error('Load student error:', error);
     alert('Lỗi: ' + error.message);
   }
+}
+
+// Test QR Code manually
+function testQRCode() {
+  const qrCode = prompt('Nhập mã QR để test (hoặc để trống để test với mã mẫu):');
+  const testCode = qrCode || 'QR_TEST123';
+  console.log('Testing with QR code:', testCode);
+  handleQRCodeScanned(testCode);
 }
