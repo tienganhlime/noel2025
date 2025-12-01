@@ -253,20 +253,22 @@ function showStudentDetail(studentId) {
   const content = document.getElementById('modalContent');
   
   const checkInInfo = student.checkIn ? `
-    <div class="detail-section">
-      <h3>✅ Check-in</h3>
-      <p>Thời gian: ${formatDateTime(student.checkIn.time)}</p>
-      ${student.checkIn.photoUrl ? `<img src="${student.checkIn.photoUrl}" alt="Ảnh check-in" class="check-photo">` : ''}
-    </div>
-  ` : '';
+  <div class="detail-section">
+    <h3>✅ Check-in</h3>
+    <p>Thời gian: ${formatDateTime(student.checkIn.time)}</p>
+    ${student.checkIn.photoUrl ? `<img src="${student.checkIn.photoUrl}" alt="Ảnh check-in" class="check-photo">` : ''}
+    <button onclick="deleteCheckIn('${student.id}')" class="btn-secondary" style="margin-top: 10px;">🗑️ Xóa check-in</button>
+  </div>
+` : '';
   
   const checkOutInfo = student.checkOut ? `
-    <div class="detail-section">
-      <h3>👋 Check-out</h3>
-      <p>Thời gian: ${formatDateTime(student.checkOut.time)}</p>
-      ${student.checkOut.photoUrl ? `<img src="${student.checkOut.photoUrl}" alt="Ảnh check-out" class="check-photo">` : ''}
-    </div>
-  ` : '';
+  <div class="detail-section">
+    <h3>👋 Check-out</h3>
+    <p>Thời gian: ${formatDateTime(student.checkOut.time)}</p>
+    ${student.checkOut.photoUrl ? `<img src="${student.checkOut.photoUrl}" alt="Ảnh check-out" class="check-photo">` : ''}
+    <button onclick="deleteCheckOut('${student.id}')" class="btn-secondary" style="margin-top: 10px;">🗑️ Xóa check-out</button>
+  </div>
+` : '';
   
   const feeHistoryHtml = (student.feeHistory || []).map(h => `
     <li>${formatDateTime(h.timestamp)} - ${h.note} (${h.changedBy})</li>
@@ -566,5 +568,46 @@ async function handleAddStudent(event) {
       submitBtn.disabled = false;
       submitBtn.textContent = '💾 Lưu học sinh';
     }
+  }
+}
+// Delete check-in
+async function deleteCheckIn(studentId) {
+  if (!confirm('⚠️ Bạn có chắc muốn xóa thông tin check-in? Học sinh sẽ quay về trạng thái "Chưa đến".')) {
+    return;
+  }
+  
+  try {
+    await db.collection('students').doc(studentId).update({
+      status: 'not-arrived',
+      checkIn: null
+    });
+    
+    alert('✅ Đã xóa check-in!');
+    closeModal();
+    loadStudents();
+  } catch (error) {
+    console.error('Delete check-in error:', error);
+    alert('❌ Lỗi xóa: ' + error.message);
+  }
+}
+
+// Delete check-out
+async function deleteCheckOut(studentId) {
+  if (!confirm('⚠️ Bạn có chắc muốn xóa thông tin check-out? Học sinh sẽ quay về trạng thái "Đã check-in".')) {
+    return;
+  }
+  
+  try {
+    await db.collection('students').doc(studentId).update({
+      status: 'checked-in',
+      checkOut: null
+    });
+    
+    alert('✅ Đã xóa check-out!');
+    closeModal();
+    loadStudents();
+  } catch (error) {
+    console.error('Delete check-out error:', error);
+    alert('❌ Lỗi xóa: ' + error.message);
   }
 }
