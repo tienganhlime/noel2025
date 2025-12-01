@@ -2,6 +2,7 @@
 
 let allStudents = [];
 let currentFilter = 'all';
+let editingStudentId = null; 
 
 // Check authentication
 auth.onAuthStateChanged((user) => {
@@ -514,57 +515,6 @@ function closeAddStudentModal() {
   document.getElementById('addStudentModal').style.display = 'none';
 }
 
-  const qrCode = generateQRCode();
-  
-  const studentData = {
-    name: name,
-    class: studentClass,
-    accompaniedBy: accompanied,
-    coupons: coupons,
-    feeAmount: feeAmount,
-    feeStatus: feeStatus,
-    feePaidAt: feeStatus === 'paid' ? firebase.firestore.Timestamp.now() : null,
-    feePaidBy: feeStatus === 'paid' ? 'admin' : null,
-    feeNote: note || (feeStatus === 'paid' ? 'Đã đóng trước sự kiện' : ''),
-    feeHistory: feeStatus === 'paid' ? [{
-      timestamp: firebase.firestore.Timestamp.now(),
-      changedBy: getCurrentUserEmail(),
-      action: 'marked_paid',
-      oldStatus: 'unpaid',
-      newStatus: 'paid',
-      amount: feeAmount,
-      note: note || 'Thêm mới - Đã đóng trước'
-    }] : [],
-    qrCode: qrCode,
-    status: 'not-arrived',
-    checkIn: null,
-    checkOut: null,
-    createdAt: firebase.firestore.Timestamp.now()
-  };
-  
-  try {
-    // Disable submit button
-    const submitBtn = event.target.querySelector('button[type="submit"]');
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Đang lưu...';
-    
-    await db.collection('students').add(studentData);
-    
-    alert('✅ Đã thêm học sinh: ' + name);
-    closeAddStudentModal();
-    loadStudents();
-    
-  } catch (error) {
-    console.error('Add student error:', error);
-    alert('❌ Lỗi thêm học sinh: ' + error.message);
-  } finally {
-    const submitBtn = event.target.querySelector('button[type="submit"]');
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.textContent = '💾 Lưu học sinh';
-    }
-  }
-}
 // Delete check-in
 async function deleteCheckIn(studentId) {
   if (!confirm('⚠️ Bạn có chắc muốn xóa thông tin check-in? Học sinh sẽ quay về trạng thái "Chưa đến".')) {
