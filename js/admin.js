@@ -393,6 +393,7 @@ function exportToExcel() {
 
 // Filter buttons
 document.addEventListener('DOMContentLoaded', () => {
+  // Filter buttons
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -403,6 +404,17 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   
   document.getElementById('searchInput').addEventListener('input', renderStudents);
+  
+  // Add event listeners for new buttons
+  const downloadBtn = document.getElementById('downloadTemplateBtn');
+  if (downloadBtn) {
+    downloadBtn.addEventListener('click', downloadExcelTemplate);
+  }
+  
+  const addStudentBtn = document.getElementById('addStudentBtn');
+  if (addStudentBtn) {
+    addStudentBtn.addEventListener('click', showAddStudentForm);
+  }
 });
 
 // Close modal on outside click
