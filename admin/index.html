@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Event Check-in</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="admin-header">
+    <h1>🎓 Admin Dashboard</h1>
+    <div class="header-actions">
+      <span id="userEmail"></span>
+      <button onclick="handleLogout()" class="btn-secondary">Đăng xuất</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Upload Section -->
+    <div class="upload-section card">
+      <h2>📤 Upload danh sách học sinh</h2>
+      <p>File Excel cần có các cột: Họ tên, Lớp, Đi cùng bố mẹ, Số coupon, Đã đóng phí, Số tiền phí</p>
+      <input type="file" id="excelFile" accept=".xlsx,.xls" class="file-input">
+      <button onclick="handleUpload()" class="btn-primary">Upload & Tạo QR Code</button>
+      <div id="uploadStatus"></div>
+    </div>
+
+    <!-- Statistics Dashboard -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number" id="statTotal">0</div>
+        <div class="stat-label">Tổng học sinh</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="statCheckedIn">0</div>
+        <div class="stat-label">Đã check-in</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="statCheckedOut">0</div>
+        <div class="stat-label">Đã check-out</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="statNotArrived">0</div>
+        <div class="stat-label">Chưa đến</div>
+      </div>
+      <div class="stat-card stat-money">
+        <div class="stat-number" id="statFeePaid">0</div>
+        <div class="stat-label">💰 Đã thu phí</div>
+      </div>
+      <div class="stat-card stat-warning">
+        <div class="stat-number" id="statFeeUnpaid">0</div>
+        <div class="stat-label">⏳ Chưa thu phí</div>
+      </div>
+      <div class="stat-card stat-success">
+        <div class="stat-number" id="statTotalMoney">0đ</div>
+        <div class="stat-label">💵 Tổng tiền thu</div>
+      </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="search-filter-section card">
+      <input type="text" id="searchInput" placeholder="🔍 Tìm kiếm tên học sinh..." class="search-input">
+      
+      <div class="filter-buttons">
+        <button class="filter-btn active" data-filter="all">Tất cả</button>
+        <button class="filter-btn" data-filter="not-arrived">Chưa đến</button>
+        <button class="filter-btn" data-filter="checked-in">Đã check-in</button>
+        <button class="filter-btn" data-filter="checked-out">Đã check-out</button>
+        <button class="filter-btn" data-filter="fee-paid">Đã đóng phí</button>
+        <button class="filter-btn" data-filter="fee-unpaid">Chưa đóng phí</button>
+        <button class="filter-btn" data-filter="with-parents">Đi cùng bố mẹ</button>
+        <button class="filter-btn" data-filter="alone">Đi một mình</button>
+      </div>
+
+      <button onclick="exportToExcel()" class="btn-success">📊 Export Excel</button>
+    </div>
+
+    <!-- Students List -->
+    <div class="students-list" id="studentsList">
+      <div class="loading">Đang tải dữ liệu...</div>
+    </div>
+  </div>
+
+  <!-- Student Detail Modal -->
+  <div id="studentModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <!-- QR Code Modal -->
+  <div id="qrModal" class="modal">
+    <div class="modal-content qr-modal-content">
+      <span class="close" onclick="closeQRModal()">&times;</span>
+      <div id="qrContent"></div>
+    </div>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <!-- Không cần Storage -->
+  <script src="../js/firebase-config.js"></script>
+  
+  <!-- Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  
+  <script src="../js/admin.js"></script>
+</body>
+</html>
