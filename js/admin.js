@@ -759,32 +759,26 @@ async function printAllQRCodes() {
     const studentsPerPage = 6;
     const totalPages = Math.ceil(allStudents.length / studentsPerPage);
 
-    // ========== PHẦN NÀY QUAN TRỌNG ==========
     for (let pageIndex = 0; pageIndex < totalPages; pageIndex++) {
       const pageDiv = document.createElement('div');
       pageDiv.className = 'qr-page';
 
-      // Tính đúng index học sinh cho từng trang
       const startIdx = pageIndex * studentsPerPage;
       const endIdx = Math.min(startIdx + studentsPerPage, allStudents.length);
       const studentsInPage = allStudents.slice(startIdx, endIdx);
 
-      // Tạo 3 hàng, mỗi hàng 2 cột
       for (let rowIndex = 0; rowIndex < 3; rowIndex++) {
         const rowDiv = document.createElement('div');
         rowDiv.className = 'qr-row';
 
-        // Mỗi hàng có 2 card
         for (let colIndex = 0; colIndex < 2; colIndex++) {
           const studentIndex = rowIndex * 2 + colIndex;
           
-          // CHỈ TẠO CARD NẾU CÒN HỌC SINH
           if (studentIndex < studentsInPage.length) {
             const student = studentsInPage[studentIndex];
             const cardDiv = document.createElement('div');
             cardDiv.className = 'qr-card';
 
-            // Logo
             const logoImg = document.createElement('img');
             logoImg.src = logoUrl;
             logoImg.className = 'qr-card-logo';
@@ -794,23 +788,20 @@ async function printAllQRCodes() {
             };
             cardDiv.appendChild(logoImg);
 
-            // QR Code container
             const qrDiv = document.createElement('div');
             qrDiv.className = 'qr-card-qrcode';
             cardDiv.appendChild(qrDiv);
 
-            // Generate QR - DÙNG student.id (không phải student.qrCode)
             await new Promise((resolve) => {
               new QRCode(qrDiv, {
-                text: student.id,  // ← QUAN TRỌNG: dùng ID
-                width: 105,
-                height: 105,
+                text: student.id,
+                width: 100,
+                height: 100,
                 correctLevel: QRCode.CorrectLevel.H
               });
               setTimeout(resolve, 50);
             });
 
-            // Student info
             const nameDiv = document.createElement('div');
             nameDiv.className = 'qr-card-name';
             nameDiv.textContent = student.name;
@@ -838,17 +829,21 @@ async function printAllQRCodes() {
 
     document.body.removeChild(loadingDiv);
 
-    // Show preview
-    printContainer.className = 'print-container preview';
-    document.body.style.overflow = 'hidden';  // ← THÊM dòng này
+    // ========== THAY ĐỔI: HIỆN DIALOG TRƯỚC KHI IN ==========
+    const confirmPrint = confirm(`✅ Đã tạo xong ${totalPages} trang QR!\n\n📄 Sẵn sàng in?\n\n💡 Mẹo: Chọn "Print to PDF" để xem trước trước khi in thật.`);
     
-    const actionsDiv = document.createElement('div');
-    actionsDiv.className = 'print-preview-actions';
-    actionsDiv.innerHTML = `
-      <button onclick="window.print()" style="background: #4CAF50; color: white;">🖨️ In ngay</button>
-      <button onclick="closePrintPreview()" style="background: #f44336; color: white;">❌ Hủy</button>
-    `;
-    printContainer.appendChild(actionsDiv);
+    if (confirmPrint) {
+      // In trực tiếp
+      window.print();
+      
+      // Xóa sau khi in xong (hoặc hủy)
+      setTimeout(() => {
+        printContainer.innerHTML = '';
+      }, 1000);
+    } else {
+      // Nếu hủy thì xóa luôn
+      printContainer.innerHTML = '';
+    }
 
   } catch (error) {
     console.error('Error:', error);
@@ -859,11 +854,4 @@ async function printAllQRCodes() {
   }
 }
 
-function closePrintPreview() {
-  const printContainer = document.getElementById('printContainer');
-  if (printContainer) {
-    printContainer.className = 'print-container';
-    printContainer.innerHTML = '';
-  }
-  document.body.style.overflow = '';  // ← THÊM: khôi phục scroll
-}
+// BỎ hàm closePrintPreview() - không cần nữa
