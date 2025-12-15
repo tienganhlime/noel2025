@@ -727,3 +727,128 @@ Nhập "XOA" (viết hoa) để xác nhận:`;
     alert('❌ Lỗi xóa: ' + error.message);
   }
 }
+// ==================== PRINT QR CODES ====================
+async function printAllQRCodes() {
+  if (!allStudents || allStudents.length === 0) {
+    alert('⚠️ Chưa có học sinh nào trong hệ thống!');
+    return;
+  }
+
+  // Confirm before printing
+  if (!confirm(`Bạn có muốn in ${allStudents.length} mã QR không?`)) {
+    return;
+  }
+
+  // Show loading
+  const loadingDiv = document.createElement('div');
+  loadingDiv.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: 99999; text-align: center;';
+  loadingDiv.innerHTML = '<div style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">⏳ Đang tạo mã QR...</div><div style="color: #666;">Vui lòng đợi...</div>';
+  document.body.appendChild(loadingDiv);
+
+  try {
+    // Create print container
+    let printContainer = document.getElementById('printContainer');
+    if (!printContainer) {
+      printContainer = document.createElement('div');
+      printContainer.id = 'printContainer';
+      printContainer.className = 'print-container';
+      document.body.appendChild(printContainer);
+    }
+    printContainer.innerHTML = '';
+
+    // Logo URL - BẠN THAY LINK LOGO VÀO ĐÂY
+    const logoUrl = 'YOUR_LOGO_URL_HERE'; // ⚠️ THAY LINK LOGO TẠI ĐÂY
+    const hotline = '0976222792';
+    const centerName = 'Tiếng Anh Trẻ Em LIME';
+
+    // Generate QR codes in batches of 6 per page
+    const studentsPerPage = 6;
+    const totalPages = Math.ceil(allStudents.length / studentsPerPage);
+
+    for (let pageIndex = 0; pageIndex < totalPages; pageIndex++) {
+      const pageDiv = document.createElement('div');
+      pageDiv.className = 'qr-page';
+
+      const startIdx = pageIndex * studentsPerPage;
+      const endIdx = Math.min(startIdx + studentsPerPage, allStudents.length);
+      const studentsInPage = allStudents.slice(startIdx, endIdx);
+
+      for (const student of studentsInPage) {
+        const cardDiv = document.createElement('div');
+        cardDiv.className = 'qr-card';
+
+        // Logo
+        const logoImg = document.createElement('img');
+        logoImg.src = logoUrl;
+        logoImg.className = 'qr-card-logo';
+        logoImg.alt = centerName;
+        cardDiv.appendChild(logoImg);
+
+        // QR Code
+        const qrDiv = document.createElement('div');
+        qrDiv.className = 'qr-card-qrcode';
+        cardDiv.appendChild(qrDiv);
+
+        // Generate QR code
+        await new Promise((resolve) => {
+          new QRCode(qrDiv, {
+            text: student.id,
+            width: 150,
+            height: 150,
+            correctLevel: QRCode.CorrectLevel.H
+          });
+          setTimeout(resolve, 100); // Wait for QR generation
+        });
+
+        // Student name
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'qr-card-name';
+        nameDiv.textContent = student.name;
+        cardDiv.appendChild(nameDiv);
+
+        // Class
+        const classDiv = document.createElement('div');
+        classDiv.className = 'qr-card-class';
+        classDiv.textContent = `Lớp: ${student.class}`;
+        cardDiv.appendChild(classDiv);
+
+        // Hotline
+        const hotlineDiv = document.createElement('div');
+        hotlineDiv.className = 'qr-card-hotline';
+        hotlineDiv.textContent = `📞 Hotline: ${hotline}`;
+        cardDiv.appendChild(hotlineDiv);
+
+        pageDiv.appendChild(cardDiv);
+      }
+
+      printContainer.appendChild(pageDiv);
+    }
+
+    // Remove loading
+    document.body.removeChild(loadingDiv);
+
+    // Show preview with print button
+    printContainer.className = 'print-container preview';
+    
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'print-preview-actions';
+    actionsDiv.innerHTML = `
+      <button onclick="window.print()" style="background: #4CAF50; color: white;">🖨️ In ngay</button>
+      <button onclick="closePrintPreview()" style="background: #f44336; color: white;">❌ Hủy</button>
+    `;
+    printContainer.appendChild(actionsDiv);
+
+  } catch (error) {
+    console.error('Error generating QR codes:', error);
+    alert('❌ Có lỗi khi tạo mã QR. Vui lòng thử lại!');
+    document.body.removeChild(loadingDiv);
+  }
+}
+
+function closePrintPreview() {
+  const printContainer = document.getElementById('printContainer');
+  if (printContainer) {
+    printContainer.className = 'print-container';
+    printContainer.innerHTML = '';
+  }
+}
