@@ -840,6 +840,7 @@ async function printAllQRCodes() {
 
     // Show preview
     printContainer.className = 'print-container preview';
+    document.body.style.overflow = 'hidden';  // ← THÊM dòng này
     
     const actionsDiv = document.createElement('div');
     actionsDiv.className = 'print-preview-actions';
@@ -864,4 +865,5 @@ function closePrintPreview() {
     printContainer.className = 'print-container';
     printContainer.innerHTML = '';
   }
+  document.body.style.overflow = '';  // ← THÊM: khôi phục scroll
 }
