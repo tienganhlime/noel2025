@@ -757,7 +757,7 @@ async function printAllQRCodes() {
     printContainer.innerHTML = '';
 
     // Logo URL - BẠN THAY LINK LOGO VÀO ĐÂY
-    const logoUrl = 'https://lime.edu.vn/images/logo-big.png'; // ⚠️ THAY LINK LOGO TẠI ĐÂY
+    const logoUrl = 'https://tse3.mm.bing.net/th/id/OIP.aTEx9C3wo1BC7AcutLcqlQHaD-?cb=ucfimg2&ucfimg=1&rs=1&pid=ImgDetMain&o=7&rm=3'; // ⚠️ THAY LINK LOGO TẠI ĐÂY
     const hotline = '0976222792';
     const centerName = 'Tiếng Anh Trẻ Em LIME';
 
