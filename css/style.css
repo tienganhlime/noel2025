@@ -1040,23 +1040,25 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: #e0e0e0;
+  background: #525252;
   z-index: 10000;
-  overflow: auto;
+  overflow-y: auto;  /* ← CHỈ GIỮ LẠI CÁI NÀY */
+  overflow-x: hidden;  /* ← THÊM: ẩn cuộn ngang */
   padding: 20px;
 }
 
 .print-container.preview .qr-page {
   background: white;
   margin: 0 auto 20px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   width: 210mm;
   height: 297mm;
-  padding: 15mm 10mm;
+  padding: 8mm 5mm;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: space-evenly;
+  overflow: hidden;  /* ← THÊM: ngăn overflow trong page */
 }
 
 .print-container.preview .qr-row {
@@ -1133,4 +1135,7 @@ body {
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
                               }
-
+/* Hide body scroll when preview is open */
+body:has(.print-container.preview) {
+  overflow: hidden !important;
+}
