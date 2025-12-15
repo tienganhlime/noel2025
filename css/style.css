@@ -952,9 +952,11 @@ body {
     width: 210mm;
     height: 297mm;
     margin: 0;
-    padding: 0;
+    padding: 10mm 8mm;  /* ← THAY ĐỔI: giảm padding */
     box-sizing: border-box;
-    display: block;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;  /* ← THÊM: căn đều các row */
   }
   
   .qr-page:last-child {
@@ -963,64 +965,62 @@ body {
   
   .qr-row {
     width: 100%;
-    height: 33.333%;
-    display: block;
-    position: relative;
+    display: flex;  /* ← THÊM */
+    flex-direction: row;  /* ← THÊM */
+    justify-content: space-evenly;  /* ← THÊM: căn đều 2 cột */
+    align-items: center;  /* ← THÊM */
     page-break-inside: avoid;
   }
   
   .qr-card {
     border: 2px dashed #999;
-    width: 95mm;
-    height: 95mm;
-    padding: 8mm;
-    display: inline-block;
-    vertical-align: top;
+    width: 90mm;  /* ← THAY ĐỔI: từ 95mm xuống 90mm */
+    height: 90mm;  /* ← THAY ĐỔI: từ 95mm xuống 90mm */
+    padding: 6mm;  /* ← THAY ĐỔI: từ 8mm xuống 6mm */
+    display: flex;  /* ← THÊM */
+    flex-direction: column;  /* ← THÊM */
+    align-items: center;  /* ← THÊM */
+    justify-content: center;  /* ← THÊM */
     text-align: center;
     background: white;
     page-break-inside: avoid;
     box-sizing: border-box;
-    margin: 2.5mm;
-  }
-  
-  .qr-card:first-child {
-    margin-left: 5mm;
   }
   
   .qr-card-logo {
-    width: 50px;
-    height: 50px;
-    margin: 0 auto 5mm auto;
+    width: 45px;  /* ← THAY ĐỔI: từ 50px xuống 45px */
+    height: 45px;
+    margin: 0 auto 4mm auto;  /* ← THAY ĐỔI: từ 5mm xuống 4mm */
     display: block;
     object-fit: contain;
   }
   
   .qr-card-qrcode {
-    margin: 5mm auto;
+    margin: 4mm auto;  /* ← THAY ĐỔI: từ 5mm xuống 4mm */
     display: block;
     text-align: center;
   }
   
   .qr-card-qrcode canvas,
   .qr-card-qrcode img {
-    width: 110px !important;
-    height: 110px !important;
+    width: 105px !important;  /* ← THAY ĐỔI: từ 110px xuống 105px */
+    height: 105px !important;
     margin: 0 auto;
     display: block;
   }
   
   .qr-card-name {
-    font-size: 15px;
+    font-size: 14px;  /* ← THAY ĐỔI: từ 15px xuống 14px */
     font-weight: bold;
-    margin: 4mm 0 2mm 0;
+    margin: 3mm 0 2mm 0;  /* ← THAY ĐỔI: từ 4mm xuống 3mm */
     color: #000;
     line-height: 1.2;
   }
   
   .qr-card-class {
-    font-size: 12px;
+    font-size: 11px;  /* ← THAY ĐỔI: từ 12px xuống 11px */
     color: #333;
-    margin-bottom: 3mm;
+    margin-bottom: 2mm;  /* ← THAY ĐỔI: từ 3mm xuống 2mm */
     line-height: 1.2;
   }
   
