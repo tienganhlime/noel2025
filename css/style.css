@@ -907,6 +907,7 @@ body {
   }
 }
 /* ==================== PRINT QR CODES ==================== */
+/* ==================== PRINT QR CODES ==================== */
 .print-container {
   display: none;
 }
@@ -932,17 +933,11 @@ body {
   }
   
   .print-container {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    display: block;
-    margin: 0;
-    padding: 0;
-  }
-  
-  .print-preview-actions {
-    display: none !important;
+    position: static !important;
+    width: 100% !important;
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
   
   .qr-page {
@@ -952,11 +947,11 @@ body {
     width: 210mm;
     height: 297mm;
     margin: 0;
-    padding: 10mm 8mm;  /* ← THAY ĐỔI: giảm padding */
+    padding: 8mm 5mm;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly;  /* ← THÊM: căn đều các row */
+    justify-content: space-evenly;
   }
   
   .qr-page:last-child {
@@ -965,22 +960,23 @@ body {
   
   .qr-row {
     width: 100%;
-    display: flex;  /* ← THÊM */
-    flex-direction: row;  /* ← THÊM */
-    justify-content: space-evenly;  /* ← THÊM: căn đều 2 cột */
-    align-items: center;  /* ← THÊM */
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
     page-break-inside: avoid;
+    gap: 5mm;
   }
   
   .qr-card {
     border: 2px dashed #999;
-    width: 90mm;  /* ← THAY ĐỔI: từ 95mm xuống 90mm */
-    height: 90mm;  /* ← THAY ĐỔI: từ 95mm xuống 90mm */
-    padding: 6mm;  /* ← THAY ĐỔI: từ 8mm xuống 6mm */
-    display: flex;  /* ← THÊM */
-    flex-direction: column;  /* ← THÊM */
-    align-items: center;  /* ← THÊM */
-    justify-content: center;  /* ← THÊM */
+    width: 92mm;
+    height: 88mm;
+    padding: 5mm;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-align: center;
     background: white;
     page-break-inside: avoid;
@@ -988,154 +984,46 @@ body {
   }
   
   .qr-card-logo {
-    width: 45px;  /* ← THAY ĐỔI: từ 50px xuống 45px */
-    height: 45px;
-    margin: 0 auto 4mm auto;  /* ← THAY ĐỔI: từ 5mm xuống 4mm */
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 3mm auto;
     display: block;
     object-fit: contain;
   }
   
   .qr-card-qrcode {
-    margin: 4mm auto;  /* ← THAY ĐỔI: từ 5mm xuống 4mm */
+    margin: 3mm auto;
     display: block;
     text-align: center;
   }
   
   .qr-card-qrcode canvas,
   .qr-card-qrcode img {
-    width: 105px !important;  /* ← THAY ĐỔI: từ 110px xuống 105px */
-    height: 105px !important;
+    width: 100px !important;
+    height: 100px !important;
     margin: 0 auto;
     display: block;
   }
   
   .qr-card-name {
-    font-size: 14px;  /* ← THAY ĐỔI: từ 15px xuống 14px */
+    font-size: 13px;
     font-weight: bold;
-    margin: 3mm 0 2mm 0;  /* ← THAY ĐỔI: từ 4mm xuống 3mm */
+    margin: 2mm 0 1.5mm 0;
     color: #000;
-    line-height: 1.2;
+    line-height: 1.1;
   }
   
   .qr-card-class {
-    font-size: 11px;  /* ← THAY ĐỔI: từ 12px xuống 11px */
+    font-size: 11px;
     color: #333;
-    margin-bottom: 2mm;  /* ← THAY ĐỔI: từ 3mm xuống 2mm */
-    line-height: 1.2;
+    margin-bottom: 1.5mm;
+    line-height: 1.1;
   }
   
   .qr-card-hotline {
-    font-size: 10px;
+    font-size: 9px;
     color: #2196F3;
     font-weight: 600;
-    line-height: 1.2;
+    line-height: 1.1;
   }
-}
-
-/* Preview styles */
-.print-container.preview {
-  display: block;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: #525252;
-  z-index: 10000;
-  overflow-y: auto;  /* ← CHỈ GIỮ LẠI CÁI NÀY */
-  overflow-x: hidden;  /* ← THÊM: ẩn cuộn ngang */
-  padding: 20px;
-}
-
-.print-container.preview .qr-page {
-  background: white;
-  margin: 0 auto 20px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-  width: 210mm;
-  height: 297mm;
-  padding: 8mm 5mm;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-evenly;
-  overflow: hidden;  /* ← THÊM: ngăn overflow trong page */
-}
-
-.print-container.preview .qr-row {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  width: 100%;
-  height: 32%;
-  gap: 8mm;
-}
-
-.print-container.preview .qr-card {
-  border: 2px dashed #999;
-  padding: 5mm;
-  width: 48%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  box-sizing: border-box;
-}
-
-.print-container.preview .qr-card-logo {
-  width: 60px;
-  height: 60px;
-  margin-bottom: 3mm;
-  object-fit: contain;
-}
-
-.print-container.preview .qr-card-qrcode {
-  margin: 3mm 0;
-}
-
-.print-container.preview .qr-card-qrcode canvas {
-  width: 120px !important;
-  height: 120px !important;
-}
-
-.print-container.preview .qr-card-name {
-  font-size: 16px;
-  font-weight: bold;
-  margin: 3mm 0 2mm 0;
-  color: #000;
-}
-
-.print-container.preview .qr-card-class {
-  font-size: 13px;
-  color: #333;
-  margin-bottom: 2mm;
-}
-
-.print-container.preview .qr-card-hotline {
-  font-size: 11px;
-  color: #2196F3;
-  font-weight: 600;
-}
-
-.print-preview-actions {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 10001;
-  display: flex;
-  gap: 10px;
-}
-
-.print-preview-actions button {
-  padding: 12px 24px;
-  font-size: 16px;
-  cursor: pointer;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-                              }
-/* Hide body scroll when preview is open */
-body:has(.print-container.preview) {
-  overflow: hidden !important;
 }
