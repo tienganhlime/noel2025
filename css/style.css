@@ -952,83 +952,79 @@ body {
     width: 210mm;
     height: 297mm;
     margin: 0;
-    padding: 8mm 5mm;
+    padding: 6mm 4mm;  /* Giảm padding trang một chút để card lớn hơn */
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly;
+    justify-content: space-between;  /* Giãn đều 3 hàng */
+    gap: 4mm;  /* Khoảng cách giữa các hàng */
   }
-  
+
   .qr-page:last-child {
     page-break-after: auto;
   }
-  
+
   .qr-row {
     width: 100%;
     display: flex;
     flex-direction: row;
     justify-content: space-around;
     align-items: center;
-    page-break-inside: avoid;
-    gap: 5mm;
+    gap: 4mm;
   }
-  
+
   .qr-card {
     border: 2px dashed #999;
-    width: 92mm;
-    height: 88mm;
-    padding: 5mm;
+    width: 95mm;        /* Tăng nhẹ width */
+    height: 90mm;       /* Tăng height để tận dụng gần hết không gian */
+    padding: 4mm 6mm;   /* Giảm padding bên trong */
     display: flex;
     flex-direction: column;
+    justify-content: flex-start;  /* Bắt đầu từ trên xuống */
     align-items: center;
-    justify-content: center;
-    text-align: center;
     background: white;
-    page-break-inside: avoid;
     box-sizing: border-box;
+    gap: 3mm;           /* Khoảng cách giữa các phần tử bên trong card */
   }
-  
+
   .qr-card-logo {
-    width: 70px;
+    width: 70px;        /* Logo to hơn rất nhiều */
     height: 70px;
-    margin: 0 auto 3mm auto;
-    display: block;
+    margin: 0;          /* Bỏ margin cũ */
     object-fit: contain;
   }
-  
+
   .qr-card-qrcode {
-    margin: 3mm auto;
-    display: block;
-    text-align: center;
+    margin: 0;
   }
-  
+
   .qr-card-qrcode canvas,
   .qr-card-qrcode img {
-    width: 160px !important;
+    width: 160px !important;   /* QR siêu to, dễ quét từ xa */
     height: 160px !important;
     margin: 0 auto;
     display: block;
   }
-  
+
   .qr-card-name {
-    font-size: 14px;
+    font-size: 15px;    /* Tên to hơn */
     font-weight: bold;
-    margin: 2mm 0 1.5mm 0;
-    color: #000;
-    line-height: 1.1;
+    margin: 0;
+    line-height: 1.2;
+    text-align: center;
   }
-  
+
   .qr-card-class {
-    font-size: 12px;
-    color: #333;
-    margin-bottom: 1.5mm;
-    line-height: 1.1;
+    font-size: 13px;
+    margin: 0;
+    line-height: 1.2;
   }
-  
+
   .qr-card-hotline {
-    font-size: 12px;
+    font-size: 11px;
     color: #2196F3;
     font-weight: 600;
-    line-height: 1.1;
+    margin: 0;
+    line-height: 1.2;
   }
 }
