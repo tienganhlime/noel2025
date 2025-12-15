@@ -909,10 +909,10 @@ body {
 /* ==================== PRINT QR CODES ==================== */
 /* ==================== PRINT QR CODES ==================== */
 .print-container {
-  display: none;
   position: absolute;  /* ← THÊM: để không ảnh hưởng layout */
   left: -9999px;       /* ← THÊM: đẩy ra ngoài màn hình */
   top: 0;
+  visibility: hidden; 
 }
 
 @media print {
@@ -937,6 +937,7 @@ body {
   
   .print-container {
     position: static !important;
+    visibility: visible !important;    /* ← THÊM DÒNG NÀY */
     width: 100% !important;
     display: block !important;
     margin: 0 !important;
