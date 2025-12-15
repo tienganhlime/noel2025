@@ -829,19 +829,23 @@ async function printAllQRCodes() {
 
     document.body.removeChild(loadingDiv);
 
-    // ========== QUAN TRỌNG: HIỆN CONTAINER TRƯỚC KHI IN ==========
-    printContainer.style.display = 'block';
+    // ========== HIỆN CONTAINER & ĐỢI RENDER ==========
+    printContainer.style.position = 'static';
+    printContainer.style.visibility = 'visible';
+    printContainer.style.left = '0';
     
-    // Đợi một chút để browser render xong
+    // Đợi LÂU HƠN để QR code render xong
     setTimeout(() => {
       window.print();
       
       // Ẩn lại sau khi đóng dialog print
       setTimeout(() => {
-        printContainer.style.display = 'none';
+        printContainer.style.position = 'absolute';
+        printContainer.style.visibility = 'hidden';
+        printContainer.style.left = '-9999px';
         printContainer.innerHTML = '';
-      }, 500);
-    }, 100);
+      }, 1000);
+    }, 500);  // ← Tăng từ 100 lên 500ms
 
   } catch (error) {
     console.error('Error:', error);
