@@ -728,7 +728,6 @@ Nhập "XOA" (viết hoa) để xác nhận:`;
   }
 }
 // ==================== PRINT QR CODES ====================
-// ==================== PRINT QR CODES ====================
 async function printAllQRCodes() {
   if (!allStudents || allStudents.length === 0) {
     alert('⚠️ Chưa có học sinh nào trong hệ thống!');
@@ -755,10 +754,9 @@ async function printAllQRCodes() {
     printContainer.innerHTML = '';
 
     // ⚠️ THAY LINK LOGO CỦA BẠN VÀO ĐÂY
-    const logoUrl = 'https://i.imgur.com/your-logo.png'; // <-- ĐỔI LINK NÀY
+    const logoUrl = 'https://gofirst.pro/images/uploads/62/baseimg/logo_16541442053.png'; // <-- ĐỔI LINK NÀY
     const hotline = '0976222792';
 
-    // Generate pages with 6 cards each (3 rows x 2 columns)
     const studentsPerPage = 6;
     const totalPages = Math.ceil(allStudents.length / studentsPerPage);
 
@@ -770,12 +768,11 @@ async function printAllQRCodes() {
       const endIdx = Math.min(startIdx + studentsPerPage, allStudents.length);
       const studentsInPage = allStudents.slice(startIdx, endIdx);
 
-      // Create 3 rows
+      // Create 3 rows, each with 2 cards
       for (let rowIndex = 0; rowIndex < 3; rowIndex++) {
         const rowDiv = document.createElement('div');
         rowDiv.className = 'qr-row';
 
-        // Each row has 2 cards
         for (let colIndex = 0; colIndex < 2; colIndex++) {
           const studentIndex = rowIndex * 2 + colIndex;
           
@@ -788,9 +785,9 @@ async function printAllQRCodes() {
             const logoImg = document.createElement('img');
             logoImg.src = logoUrl;
             logoImg.className = 'qr-card-logo';
-            logoImg.alt = 'Tiếng Anh Trẻ Em LIME';
+            logoImg.alt = 'LIME';
             logoImg.onerror = function() {
-              this.style.display = 'none'; // Ẩn nếu logo lỗi
+              this.style.display = 'none';
             };
             cardDiv.appendChild(logoImg);
 
@@ -799,11 +796,12 @@ async function printAllQRCodes() {
             qrDiv.className = 'qr-card-qrcode';
             cardDiv.appendChild(qrDiv);
 
+            // Generate QR
             await new Promise((resolve) => {
               new QRCode(qrDiv, {
                 text: student.id,
-                width: 120,
-                height: 120,
+                width: 110,
+                height: 110,
                 correctLevel: QRCode.CorrectLevel.H
               });
               setTimeout(resolve, 50);
@@ -828,12 +826,6 @@ async function printAllQRCodes() {
             cardDiv.appendChild(hotlineDiv);
 
             rowDiv.appendChild(cardDiv);
-          } else {
-            // Empty card placeholder
-            const emptyDiv = document.createElement('div');
-            emptyDiv.className = 'qr-card';
-            emptyDiv.style.visibility = 'hidden';
-            rowDiv.appendChild(emptyDiv);
           }
         }
 
@@ -856,8 +848,8 @@ async function printAllQRCodes() {
     printContainer.appendChild(actionsDiv);
 
   } catch (error) {
-    console.error('Error generating QR codes:', error);
-    alert('❌ Có lỗi khi tạo mã QR. Vui lòng thử lại!');
+    console.error('Error:', error);
+    alert('❌ Có lỗi khi tạo mã QR!');
     if (document.body.contains(loadingDiv)) {
       document.body.removeChild(loadingDiv);
     }
