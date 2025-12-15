@@ -926,8 +926,8 @@ body {
     print-color-adjust: exact !important;
   }
   
-  body * {
-    visibility: hidden;
+  body > *:not(.print-container) {
+    display: none !important;  /* ← Ẩn mọi thứ TRỪ print-container */
   }
   
   .print-container,
@@ -935,11 +935,12 @@ body {
     visibility: visible;
   }
   
-  .print-container {
+    .print-container {
     position: static !important;
-    visibility: visible !important;    /* ← THÊM DÒNG NÀY */
-    width: 100% !important;
+    visibility: visible !important;
+    left: 0 !important;
     display: block !important;
+    width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
   }
