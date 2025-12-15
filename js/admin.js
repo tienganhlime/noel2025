@@ -829,21 +829,19 @@ async function printAllQRCodes() {
 
     document.body.removeChild(loadingDiv);
 
-    // ========== THAY ĐỔI: HIỆN DIALOG TRƯỚC KHI IN ==========
-    const confirmPrint = confirm(`✅ Đã tạo xong ${totalPages} trang QR!\n\n📄 Sẵn sàng in?\n\n💡 Mẹo: Chọn "Print to PDF" để xem trước trước khi in thật.`);
+    // ========== QUAN TRỌNG: HIỆN CONTAINER TRƯỚC KHI IN ==========
+    printContainer.style.display = 'block';
     
-    if (confirmPrint) {
-      // In trực tiếp
+    // Đợi một chút để browser render xong
+    setTimeout(() => {
       window.print();
       
-      // Xóa sau khi in xong (hoặc hủy)
+      // Ẩn lại sau khi đóng dialog print
       setTimeout(() => {
+        printContainer.style.display = 'none';
         printContainer.innerHTML = '';
-      }, 1000);
-    } else {
-      // Nếu hủy thì xóa luôn
-      printContainer.innerHTML = '';
-    }
+      }, 500);
+    }, 100);
 
   } catch (error) {
     console.error('Error:', error);
@@ -853,5 +851,3 @@ async function printAllQRCodes() {
     }
   }
 }
-
-// BỎ hàm closePrintPreview() - không cần nữa
