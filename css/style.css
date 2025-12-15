@@ -989,8 +989,8 @@ body {
   }
   
   .qr-card-logo {
-    width: 40px;
-    height: 40px;
+    width: 70px;
+    height: 70px;
     margin: 0 auto 3mm auto;
     display: block;
     object-fit: contain;
@@ -1004,14 +1004,14 @@ body {
   
   .qr-card-qrcode canvas,
   .qr-card-qrcode img {
-    width: 100px !important;
-    height: 100px !important;
+    width: 160px !important;
+    height: 160px !important;
     margin: 0 auto;
     display: block;
   }
   
   .qr-card-name {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: bold;
     margin: 2mm 0 1.5mm 0;
     color: #000;
@@ -1019,14 +1019,14 @@ body {
   }
   
   .qr-card-class {
-    font-size: 11px;
+    font-size: 12px;
     color: #333;
     margin-bottom: 1.5mm;
     line-height: 1.1;
   }
   
   .qr-card-hotline {
-    font-size: 9px;
+    font-size: 12px;
     color: #2196F3;
     font-weight: 600;
     line-height: 1.1;
