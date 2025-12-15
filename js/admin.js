@@ -794,7 +794,7 @@ async function printAllQRCodes() {
 
             await new Promise((resolve) => {
               new QRCode(qrDiv, {
-                text: student.id,
+                text: student.qrCode,
                 width: 100,
                 height: 100,
                 correctLevel: QRCode.CorrectLevel.H
