@@ -728,6 +728,7 @@ Nhập "XOA" (viết hoa) để xác nhận:`;
   }
 }
 // ==================== PRINT QR CODES ====================
+// ==================== PRINT QR CODES ====================
 async function printAllQRCodes() {
   if (!allStudents || allStudents.length === 0) {
     alert('⚠️ Chưa có học sinh nào trong hệ thống!');
@@ -755,10 +756,40 @@ async function printAllQRCodes() {
 
     const logoUrl = 'https://gofirst.pro/images/uploads/62/baseimg/logo_16541442053.png';
     const hotline = '0976222792';
-
     const studentsPerPage = 6;
     const totalPages = Math.ceil(allStudents.length / studentsPerPage);
 
+    // Tạo tất cả QR code TRƯỚC
+    const qrPromises = allStudents.map(student => {
+      return new Promise((resolve) => {
+        const tempDiv = document.createElement('div');
+        new QRCode(tempDiv, {
+          text: student.qrCode,
+          width: 100,
+          height: 100,
+          correctLevel: QRCode.CorrectLevel.H
+        });
+        setTimeout(() => {
+          const canvas = tempDiv.querySelector('canvas');
+          if (canvas) {
+            resolve({
+              id: student.id,
+              dataUrl: canvas.toDataURL('image/png')
+            });
+          } else {
+            resolve({ id: student.id, dataUrl: null });
+          }
+        }, 100);
+      });
+    });
+
+    const qrResults = await Promise.all(qrPromises);
+    const qrMap = {};
+    qrResults.forEach(r => {
+      qrMap[r.id] = r.dataUrl;
+    });
+
+    // Tạo các trang in
     for (let pageIndex = 0; pageIndex < totalPages; pageIndex++) {
       const pageDiv = document.createElement('div');
       pageDiv.className = 'qr-page';
@@ -779,29 +810,27 @@ async function printAllQRCodes() {
             const cardDiv = document.createElement('div');
             cardDiv.className = 'qr-card';
 
+            // Logo
             const logoImg = document.createElement('img');
             logoImg.src = logoUrl;
             logoImg.className = 'qr-card-logo';
             logoImg.alt = 'LIME';
-            logoImg.onerror = function() {
-              this.style.display = 'none';
-            };
+            logoImg.onerror = function() { this.style.display = 'none'; };
             cardDiv.appendChild(logoImg);
 
+            // QR Code từ data URL
             const qrDiv = document.createElement('div');
             qrDiv.className = 'qr-card-qrcode';
+            if (qrMap[student.id]) {
+              const qrImg = document.createElement('img');
+              qrImg.src = qrMap[student.id];
+              qrImg.style.width = '100px';
+              qrImg.style.height = '100px';
+              qrDiv.appendChild(qrImg);
+            }
             cardDiv.appendChild(qrDiv);
 
-            await new Promise((resolve) => {
-              new QRCode(qrDiv, {
-                text: student.qrCode,
-                width: 100,
-                height: 100,
-                correctLevel: QRCode.CorrectLevel.H
-              });
-              setTimeout(resolve, 50);
-            });
-
+            // Thông tin
             const nameDiv = document.createElement('div');
             nameDiv.className = 'qr-card-name';
             nameDiv.textContent = student.name;
@@ -820,36 +849,31 @@ async function printAllQRCodes() {
             rowDiv.appendChild(cardDiv);
           }
         }
-
         pageDiv.appendChild(rowDiv);
       }
-
       printContainer.appendChild(pageDiv);
     }
 
     document.body.removeChild(loadingDiv);
 
-    // ========== HIỆN CONTAINER & ĐỢI RENDER ==========
+    // Hiện container và in
     printContainer.style.position = 'static';
     printContainer.style.visibility = 'visible';
     printContainer.style.left = '0';
     
-    // Đợi LÂU HƠN để QR code render xong
     setTimeout(() => {
       window.print();
       
-      // Ẩn lại sau khi đóng dialog print
       setTimeout(() => {
         printContainer.style.position = 'absolute';
         printContainer.style.visibility = 'hidden';
         printContainer.style.left = '-9999px';
-        printContainer.innerHTML = '';
       }, 1000);
-    }, 500);  // ← Tăng từ 100 lên 500ms
+    }, 300);
 
   } catch (error) {
     console.error('Error:', error);
-    alert('❌ Có lỗi khi tạo mã QR!');
+    alert('❌ Có lỗi khi tạo mã QR: ' + error.message);
     if (document.body.contains(loadingDiv)) {
       document.body.removeChild(loadingDiv);
     }
