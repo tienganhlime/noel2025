@@ -254,14 +254,8 @@ function showStudentDetail(studentId) {
   const content = document.getElementById('modalContent');
   
   const checkInInfo = student.checkIn ? `
-<div class="detail-section">
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-    <h3>📋 ${student.name}</h3>
-    <div style="display: flex; gap: 10px;">
-      <button onclick="showEditStudentForm('${student.id}')" class="btn-secondary">✏️ Sửa</button>
-      <button onclick="deleteStudent('${student.id}')" class="btn-secondary" style="background: #dc3545;">🗑️ Xóa</button>
-    </div>
-  </div>
+  <div class="detail-section">
+    <h3>👋 Check-in</h3>
     <p>Thời gian: ${formatDateTime(student.checkIn.time)}</p>
     ${student.checkIn.photoUrl ? `<img src="${student.checkIn.photoUrl}" alt="Ảnh check-in" class="check-photo">` : ''}
     <button onclick="deleteCheckIn('${student.id}')" class="btn-secondary" style="margin-top: 10px;">🗑️ Xóa check-in</button>
@@ -282,45 +276,33 @@ function showStudentDetail(studentId) {
   `).join('');
   
   content.innerHTML = `
-    <h2>📋 Chi tiết học sinh</h2>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h2>📋 Chi tiết học sinh</h2>
+      <div style="display: flex; gap: 10px;">
+        <button onclick="showEditStudentForm('${student.id}')" class="btn-primary">✏️ Sửa thông tin</button>
+        <button onclick="deleteStudent('${student.id}')" class="btn-secondary" style="background: #dc3545;">🗑️ Xóa</button>
+      </div>
+    </div>
     
     <div class="detail-section">
-      <h3>📛 ${student.name}</h3>
-      <p>🎓 Lớp: ${student.class}</p>
-      <p>👨‍👩‍👦 Đi cùng: ${student.accompaniedBy}</p>
-      <p>🎟️ Số coupon: ${student.coupons}</p>
+      <h3>📛 Thông tin cơ bản</h3>
+      <p><strong>Họ tên:</strong> ${student.name}</p>
+      <p><strong>Lớp:</strong> ${student.class}</p>
+      <p><strong>Đi cùng:</strong> ${student.accompaniedBy}</p>
+      <p><strong>Số coupon:</strong> ${student.coupons}</p>
     </div>
     
     <div class="detail-section">
       <h3>💰 Thông tin phí</h3>
-      <div class="form-group">
-        <label>Số tiền phí:</label>
-        <input type="number" id="editFeeAmount" value="${student.feeAmount}" class="form-input">
-      </div>
-      <div class="form-group">
-        <label>Trạng thái:</label>
-        <div class="radio-group">
-          <label>
-            <input type="radio" name="feeStatus" value="paid" ${student.feeStatus === 'paid' ? 'checked' : ''}>
-            Đã đóng
-          </label>
-          <label>
-            <input type="radio" name="feeStatus" value="unpaid" ${student.feeStatus === 'unpaid' ? 'checked' : ''}>
-            Chưa đóng
-          </label>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Ghi chú:</label>
-        <textarea id="editFeeNote" class="form-input" rows="2">${student.feeNote || ''}</textarea>
-      </div>
+      <p><strong>Số tiền:</strong> ${formatCurrency(student.feeAmount)}</p>
+      <p><strong>Trạng thái:</strong> ${getFeeBadge(student.feeStatus)}</p>
+      ${student.feeNote ? `<p><strong>Ghi chú:</strong> ${student.feeNote}</p>` : ''}
       ${feeHistoryHtml ? `
         <div class="fee-history">
           <h4>📜 Lịch sử thay đổi phí:</h4>
           <ul>${feeHistoryHtml}</ul>
         </div>
       ` : ''}
-      <button onclick="saveFeeUpdate('${student.id}')" class="btn-success">💾 Lưu thay đổi phí</button>
     </div>
     
     ${checkInInfo}
@@ -332,52 +314,6 @@ function showStudentDetail(studentId) {
 
 function closeModal() {
   document.getElementById('studentModal').style.display = 'none';
-}
-
-// Save fee update
-async function saveFeeUpdate(studentId) {
-  const student = allStudents.find(s => s.id === studentId);
-  if (!student) return;
-  
-  const newAmount = parseInt(document.getElementById('editFeeAmount').value);
-  const newStatus = document.querySelector('input[name="feeStatus"]:checked').value;
-  const newNote = document.getElementById('editFeeNote').value;
-  
-  const updateData = {
-    feeAmount: newAmount,
-    feeStatus: newStatus,
-    feeNote: newNote
-  };
-  
-  // Add to history if status changed
-  if (student.feeStatus !== newStatus) {
-    const historyEntry = {
-      timestamp: firebase.firestore.Timestamp.now(),
-      changedBy: getCurrentUserEmail(),
-      action: 'updated',
-      oldStatus: student.feeStatus,
-      newStatus: newStatus,
-      amount: newAmount,
-      note: newNote || 'Admin cập nhật'
-    };
-    
-    updateData.feeHistory = firebase.firestore.FieldValue.arrayUnion(historyEntry);
-    
-    if (newStatus === 'paid') {
-      updateData.feePaidAt = firebase.firestore.Timestamp.now();
-      updateData.feePaidBy = 'admin';
-    }
-  }
-  
-  try {
-    await db.collection('students').doc(studentId).update(updateData);
-    alert('✅ Đã cập nhật thông tin phí!');
-    closeModal();
-    loadStudents();
-  } catch (error) {
-    console.error('Update error:', error);
-    alert('❌ Lỗi cập nhật: ' + error.message);
-  }
 }
 
 // Export to Excel
@@ -513,6 +449,7 @@ function showAddStudentForm() {
 
 function closeAddStudentModal() {
   document.getElementById('addStudentModal').style.display = 'none';
+  editingStudentId = null; // Reset editing mode when closing
 }
 
 // Delete check-in
@@ -556,6 +493,7 @@ async function deleteCheckOut(studentId) {
     alert('❌ Lỗi xóa: ' + error.message);
   }
 }
+
 // Show edit student form
 function showEditStudentForm(studentId) {
   const student = allStudents.find(s => s.id === studentId);
@@ -587,7 +525,7 @@ function showEditStudentForm(studentId) {
   document.getElementById('addStudentModal').style.display = 'block';
 }
 
-// Update handleAddStudent to support editing
+// Handle Add/Update Student
 async function handleAddStudentOrUpdate(event) {
   event.preventDefault();
   
@@ -605,7 +543,9 @@ async function handleAddStudentOrUpdate(event) {
   }
   
   const submitBtn = event.target.querySelector('button[type="submit"]');
+  const originalBtnText = submitBtn.textContent;
   submitBtn.disabled = true;
+  submitBtn.textContent = '⏳ Đang xử lý...';
   
   try {
     // EDITING MODE
@@ -631,7 +571,7 @@ async function handleAddStudentOrUpdate(event) {
           oldStatus: student.feeStatus,
           newStatus: feeStatus,
           amount: feeAmount,
-          note: note || 'Admin cập nhật'
+          note: note || 'Admin cập nhật trạng thái phí'
         };
         
         updateData.feeHistory = firebase.firestore.FieldValue.arrayUnion(historyEntry);
@@ -639,6 +579,9 @@ async function handleAddStudentOrUpdate(event) {
         if (feeStatus === 'paid') {
           updateData.feePaidAt = firebase.firestore.Timestamp.now();
           updateData.feePaidBy = 'admin';
+        } else {
+          updateData.feePaidAt = null;
+          updateData.feePaidBy = null;
         }
       }
       
@@ -691,7 +634,7 @@ async function handleAddStudentOrUpdate(event) {
     alert('❌ Lỗi: ' + error.message);
   } finally {
     submitBtn.disabled = false;
-    submitBtn.textContent = editingStudentId ? '💾 Cập nhật học sinh' : '💾 Lưu học sinh';
+    submitBtn.textContent = originalBtnText;
   }
 }
 
@@ -727,7 +670,7 @@ Nhập "XOA" (viết hoa) để xác nhận:`;
     alert('❌ Lỗi xóa: ' + error.message);
   }
 }
-// ==================== PRINT QR CODES ====================
+
 // ==================== PRINT QR CODES ====================
 async function printAllQRCodes() {
   if (!allStudents || allStudents.length === 0) {
@@ -735,147 +678,4 @@ async function printAllQRCodes() {
     return;
   }
 
-  if (!confirm(`Bạn có muốn in ${allStudents.length} mã QR không?`)) {
-    return;
-  }
-
-  const loadingDiv = document.createElement('div');
-  loadingDiv.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: 99999; text-align: center;';
-  loadingDiv.innerHTML = '<div style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">⏳ Đang tạo mã QR...</div><div style="color: #666;">Vui lòng đợi...</div>';
-  document.body.appendChild(loadingDiv);
-
-  try {
-    let printContainer = document.getElementById('printContainer');
-    if (!printContainer) {
-      printContainer = document.createElement('div');
-      printContainer.id = 'printContainer';
-      printContainer.className = 'print-container';
-      document.body.appendChild(printContainer);
-    }
-    printContainer.innerHTML = '';
-
-    const logoUrl = 'https://gofirst.pro/images/uploads/62/baseimg/logo_16541442053.png';
-    const hotline = '0976222792';
-    const studentsPerPage = 6;
-    const totalPages = Math.ceil(allStudents.length / studentsPerPage);
-
-    // Tạo tất cả QR code TRƯỚC
-    const qrPromises = allStudents.map(student => {
-      return new Promise((resolve) => {
-        const tempDiv = document.createElement('div');
-        new QRCode(tempDiv, {
-          text: student.qrCode,
-          width: 100,
-          height: 100,
-          correctLevel: QRCode.CorrectLevel.H
-        });
-        setTimeout(() => {
-          const canvas = tempDiv.querySelector('canvas');
-          if (canvas) {
-            resolve({
-              id: student.id,
-              dataUrl: canvas.toDataURL('image/png')
-            });
-          } else {
-            resolve({ id: student.id, dataUrl: null });
-          }
-        }, 100);
-      });
-    });
-
-    const qrResults = await Promise.all(qrPromises);
-    const qrMap = {};
-    qrResults.forEach(r => {
-      qrMap[r.id] = r.dataUrl;
-    });
-
-    // Tạo các trang in
-    for (let pageIndex = 0; pageIndex < totalPages; pageIndex++) {
-      const pageDiv = document.createElement('div');
-      pageDiv.className = 'qr-page';
-
-      const startIdx = pageIndex * studentsPerPage;
-      const endIdx = Math.min(startIdx + studentsPerPage, allStudents.length);
-      const studentsInPage = allStudents.slice(startIdx, endIdx);
-
-      for (let rowIndex = 0; rowIndex < 3; rowIndex++) {
-        const rowDiv = document.createElement('div');
-        rowDiv.className = 'qr-row';
-
-        for (let colIndex = 0; colIndex < 2; colIndex++) {
-          const studentIndex = rowIndex * 2 + colIndex;
-          
-          if (studentIndex < studentsInPage.length) {
-            const student = studentsInPage[studentIndex];
-            const cardDiv = document.createElement('div');
-            cardDiv.className = 'qr-card';
-
-            // Logo
-            const logoImg = document.createElement('img');
-            logoImg.src = logoUrl;
-            logoImg.className = 'qr-card-logo';
-            logoImg.alt = 'LIME';
-            logoImg.onerror = function() { this.style.display = 'none'; };
-            cardDiv.appendChild(logoImg);
-
-            // QR Code từ data URL
-            const qrDiv = document.createElement('div');
-            qrDiv.className = 'qr-card-qrcode';
-            if (qrMap[student.id]) {
-              const qrImg = document.createElement('img');
-              qrImg.src = qrMap[student.id];
-              qrImg.style.width = '100px';
-              qrImg.style.height = '100px';
-              qrDiv.appendChild(qrImg);
-            }
-            cardDiv.appendChild(qrDiv);
-
-            // Thông tin
-            const nameDiv = document.createElement('div');
-            nameDiv.className = 'qr-card-name';
-            nameDiv.textContent = student.name;
-            cardDiv.appendChild(nameDiv);
-
-            const classDiv = document.createElement('div');
-            classDiv.className = 'qr-card-class';
-            classDiv.textContent = `Lớp: ${student.class}`;
-            cardDiv.appendChild(classDiv);
-
-            const hotlineDiv = document.createElement('div');
-            hotlineDiv.className = 'qr-card-hotline';
-            hotlineDiv.textContent = `📞 Hotline: ${hotline}`;
-            cardDiv.appendChild(hotlineDiv);
-
-            rowDiv.appendChild(cardDiv);
-          }
-        }
-        pageDiv.appendChild(rowDiv);
-      }
-      printContainer.appendChild(pageDiv);
-    }
-
-    document.body.removeChild(loadingDiv);
-
-    // Hiện container và in
-    printContainer.style.position = 'static';
-    printContainer.style.visibility = 'visible';
-    printContainer.style.left = '0';
-    
-    setTimeout(() => {
-      window.print();
-      
-      setTimeout(() => {
-        printContainer.style.position = 'absolute';
-        printContainer.style.visibility = 'hidden';
-        printContainer.style.left = '-9999px';
-      }, 1000);
-    }, 300);
-
-  } catch (error) {
-    console.error('Error:', error);
-    alert('❌ Có lỗi khi tạo mã QR: ' + error.message);
-    if (document.body.contains(loadingDiv)) {
-      document.body.removeChild(loadingDiv);
-    }
-  }
-}
+  if (!confirm(`Bạn
